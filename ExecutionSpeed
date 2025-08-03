@@ -1,0 +1,93 @@
+1) Python code:-
+import cProfile
+
+def calculate_sum():
+    total = 0
+    for i in range(10):
+        total += sum(range(1, 1000001))
+    return total
+
+if __name__ == "__main__":
+    profiler = cProfile.Profile()
+    profiler.enable()
+    
+    result = calculate_sum()
+    
+    profiler.disable()
+    profiler.print_stats()
+    print(f"Result: {result}")
+
+2) Java Code:-
+public class Benchmark {
+    public static long calculateSum() {
+        long total = 0;
+        for (int i = 0; i < 10; i++) {
+            for (int j = 1; j <= 1000000; j++) {
+                total += j;
+            }
+        }
+        return total;
+    }
+    
+    public static void main(String[] args) {
+        long startTime = System.currentTimeMillis();
+        
+        long result = calculateSum();
+        
+        long endTime = System.currentTimeMillis();
+        
+        System.out.println("Result: " + result);
+        System.out.println("Time: " + (endTime - startTime) + " ms");
+    }
+}
+
+3) C++ Code:-
+#include <iostream>
+#include <chrono>
+
+long long calculateSum() {
+    long long total = 0;
+    for (int i = 0; i < 10; i++) {
+        for (int j = 1; j <= 1000000; j++) {
+            total += j;
+        }
+    }
+    return total;
+}
+
+int main() {
+    auto start = std::chrono::high_resolution_clock::now();
+    
+    long long result = calculateSum();
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    
+    std::cout << "Result: " << result << std::endl;
+    std::cout << "Time: " << duration.count() << " ms" << std::endl;
+    
+    return 0;
+}
+4)Rust Code:-
+use std::time::Instant;
+
+fn calculate_sum() -> u64 {
+    let mut total = 0u64;
+    for _ in 0..10 {
+        for j in 1..=1000000u64 {
+            total += j;
+        }
+    }
+    total
+}
+
+fn main() {
+    let start = Instant::now();
+    
+    let result = calculate_sum();
+    
+    let duration = start.elapsed();
+    
+    println!("Result: {}", result);
+    println!("Time: {} ms", duration.as_millis());
+}
