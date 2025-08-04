@@ -1,0 +1,137 @@
+Python:-
+import sys
+
+def memory_test():
+    print("=== Python Memory Test ===")
+    
+    # Step 1: Create first array
+    array1 = list(range(10000))
+    
+    # Step 2: Create doubled array
+    array2 = [x * 2 for x in array1]
+    
+    # Step 3: Create squared array  
+    array3 = [x * x for x in array1]
+    
+    # Calculate memory usage
+    mem1 = sys.getsizeof(array1) + sum(sys.getsizeof(x) for x in array1[:10])
+    mem2 = sys.getsizeof(array2) + sum(sys.getsizeof(x) for x in array2[:10]) 
+    mem3 = sys.getsizeof(array3) + sum(sys.getsizeof(x) for x in array3[:10])
+    
+    total_memory = (mem1 + mem2 + mem3) / (1024 * 1024)  # Convert to MB
+    
+    print(f"Array1 size: {len(array1)}")
+    print(f"Array2 size: {len(array2)}")
+    print(f"Array3 size: {len(array3)}")
+    print(f"Total memory: {total_memory:.2f} MB")
+    print(f"Sample values: {array1[100]}, {array2[100]}, {array3[100]}")
+
+Java:-
+public class MemoryTest {
+    public static void memoryTest() {
+        System.out.println("=== Java Memory Test ===");
+        
+        // Step 1: Create first array
+        int[] array1 = new int[10000];
+        for (int i = 0; i < 10000; i++) {
+            array1[i] = i;
+        }
+        
+        // Step 2: Create doubled array
+        int[] array2 = new int[10000];
+        for (int i = 0; i < 10000; i++) {
+            array2[i] = array1[i] * 2;
+        }
+        
+        // Step 3: Create squared array
+        int[] array3 = new int[10000];
+        for (int i = 0; i < 10000; i++) {
+            array3[i] = array1[i] * array1[i];
+        }
+        
+        // Calculate memory usage (each int = 4 bytes)
+        long totalBytes = (array1.length + array2.length + array3.length) * 4;
+        double totalMemory = totalBytes / (1024.0 * 1024.0);  // Convert to MB
+        
+        System.out.println("Array1 size: " + array1.length);
+        System.out.println("Array2 size: " + array2.length);
+        System.out.println("Array3 size: " + array3.length);
+        System.out.println("Total memory: " + String.format("%.2f", totalMemory) + " MB");
+        System.out.println("Sample values: " + array1[100] + ", " + array2[100] + ", " + array3[100]);
+    }
+    
+    public static void main(String[] args) {
+        memoryTest();
+    }
+}
+
+C++:-
+#include <iostream>
+#include <vector>
+#include <iomanip>
+
+void memoryTest() {
+    std::cout << "=== C++ Memory Test ===" << std::endl;
+    
+    // Step 1: Create first array
+    std::vector<int> array1;
+    for (int i = 0; i < 10000; i++) {
+        array1.push_back(i);
+    }
+    
+    // Step 2: Create doubled array
+    std::vector<int> array2;
+    for (int i = 0; i < 10000; i++) {
+        array2.push_back(array1[i] * 2);
+    }
+    
+    // Step 3: Create squared array
+    std::vector<int> array3;
+    for (int i = 0; i < 10000; i++) {
+        array3.push_back(array1[i] * array1[i]);
+    }
+    
+    // Calculate memory usage (each int = 4 bytes)
+    size_t totalBytes = (array1.size() + array2.size() + array3.size()) * sizeof(int);
+    double totalMemory = totalBytes / (1024.0 * 1024.0);  // Convert to MB
+    
+    std::cout << "Array1 size: " << array1.size() << std::endl;
+    std::cout << "Array2 size: " << array2.size() << std::endl;
+    std::cout << "Array3 size: " << array3.size() << std::endl;
+    std::cout << "Total memory: " << std::fixed << std::setprecision(2) << totalMemory << " MB" << std::endl;
+    std::cout << "Sample values: " << array1[100] << ", " << array2[100] << ", " << array3[100] << std::endl;
+}
+
+int main() {
+    memoryTest();
+    return 0;
+}
+
+Rust:-
+fn memory_test() {
+    println!("=== Rust Memory Test ===");
+    
+    // Step 1: Create first array
+    let array1: Vec<i32> = (0..10000).collect();
+    
+    // Step 2: Create doubled array
+    let array2: Vec<i32> = array1.iter().map(|x| x * 2).collect();
+    
+    // Step 3: Create squared array
+    let array3: Vec<i32> = array1.iter().map(|x| x * x).collect();
+    
+    // Calculate memory usage (each i32 = 4 bytes)
+    let total_bytes = (array1.len() + array2.len() + array3.len()) * std::mem::size_of::<i32>();
+    let total_memory = total_bytes as f64 / (1024.0 * 1024.0);  // Convert to MB
+    
+    println!("Array1 size: {}", array1.len());
+    println!("Array2 size: {}", array2.len());
+    println!("Array3 size: {}", array3.len());
+    println!("Total memory: {:.2} MB", total_memory);
+    println!("Sample values: {}, {}, {}", array1[100], array2[100], array3[100]);
+}
+
+fn main() {
+    memory_test();
+}
+memory_test()
