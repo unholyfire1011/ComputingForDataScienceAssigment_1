@@ -1,0 +1,152 @@
+Python:-
+from multiprocessing import Process, Value
+import time
+
+def sum_numbers(start, end, result):
+    with result.get_lock():
+        result.value += sum(range(start, end))
+
+def main():
+    start_time = time.time()
+    result = Value('i', 0)
+    processes = []
+
+    for i in range(4):
+        p = Process(
+            target=sum_numbers,
+            args=(i * 250_000, (i + 1) * 250_000, result)
+        )
+        processes.append(p)
+        p.start()
+
+    for p in processes:
+        p.join()
+
+    print(f"Multiprocessing result: {result.value}, Time: {time.time() - start_time:.3f}s")
+
+if __name__ == "__main__":
+    main()
+
+Java:-
+import java.util.ArrayList;
+import java.util.List;
+
+public class ConcurrencyTest {
+    static class SumTask implements Runnable {
+        private final int start;
+        private final int end;
+        private long result;
+
+        SumTask(int start, int end) {
+            this.start = start;
+            this.end = end;
+        }
+
+        @Override
+        public void run() {
+            long sum = 0;
+            for (int i = start; i < end; i++) {
+                sum += i;
+            }
+            this.result = sum;
+        }
+
+        public long getResult() { return result; }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        long startTime = System.nanoTime();
+        List<Thread> threads = new ArrayList<>();
+        SumTask[] tasks = new SumTask[4];
+
+        for (int i = 0; i < 4; i++) {
+            tasks[i] = new SumTask(i * 250_000, (i + 1) * 250_000);
+            Thread t = new Thread(tasks[i]);
+            threads.add(t);
+            t.start();
+        }
+
+        for (Thread t : threads) {
+            t.join();
+        }
+
+        long total = 0;
+        for (SumTask task : tasks) {
+            total += task.getResult();
+        }
+
+        System.out.printf("Java Threads result: %d, Time: %.3fs\n",
+            total, (System.nanoTime() - startTime) / 1e9);
+    }
+}
+
+C++:-
+#include <iostream>
+#include <vector>
+#include <thread>
+#include <chrono>
+
+void sum_numbers(int start, int end, long& result) {
+    long sum = 0;
+    for (int i = start; i < end; ++i) {
+        sum += i;
+    }
+    result = sum;
+}
+
+int main() {
+    auto start_time = std::chrono::high_resolution_clock::now();
+    std::vector<std::thread> threads;
+    long results[4] = {0};
+
+    for (int i = 0; i < 4; ++i) {
+        threads.emplace_back(
+            sum_numbers,
+            i * 250'000, (i + 1) * 250'000,
+            std::ref(results[i])
+        );
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
+
+    long total = 0;
+    for (long r : results) {
+        total += r;
+    }
+
+    auto end_time = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = end_time - start_time;
+    std::cout << "C++ Threads result: " << total 
+              << ", Time: " << elapsed.count() << "s\n";
+    return 0;
+}
+
+Rust:-
+use std::thread;
+use std::time::Instant;
+
+fn sum_numbers(start: i32, end: i32) -> i64 {
+    (start..end).map(|i| i as i64).sum()
+}
+
+fn main() {
+    let start_time = Instant::now();
+    let mut handles = vec![];
+
+    for i in 0..4 {
+        let handle = thread::spawn(move || {
+            sum_numbers(i * 250_000, (i + 1) * 250_000)
+        });
+        handles.push(handle);
+    }
+
+    let mut total = 0;
+    for handle in handles {
+        total += handle.join().unwrap();
+    }
+
+    println!("Rust Threads result: {}, Time: {:.3}s",
+        total, start_time.elapsed().as_secs_f32());
+}
