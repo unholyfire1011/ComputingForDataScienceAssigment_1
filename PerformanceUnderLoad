@@ -1,0 +1,284 @@
+Python:-
+import time
+import random
+import sys
+import tracemalloc
+
+def generate_matrix(size):
+    return [[random.random() for _ in range(size)] for _ in range(size)]
+
+def matrix_multiply(a, b):
+    size = len(a)
+    result = [[0.0 for _ in range(size)] for _ in range(size)]
+    for i in range(size):
+        for j in range(size):
+            for k in range(size):
+                result[i][j] += a[i][k] * b[k][j]
+    return result
+
+def test_stability(load_factor):
+    tracemalloc.start()
+    
+    start_time = time.time()
+    matrix_size = int(50 * load_factor)
+    
+    # Generate matrices
+    a = generate_matrix(matrix_size)
+    b = generate_matrix(matrix_size)
+    
+    # Perform multiplication
+    result = matrix_multiply(a, b)
+    
+    elapsed_time = time.time() - start_time
+    current, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    
+    return {
+        "load_factor": load_factor,
+        "matrix_size": matrix_size,
+        "time_sec": elapsed_time,
+        "memory_current_mb": current / (1024 * 1024),
+        "memory_peak_mb": peak / (1024 * 1024)
+    }
+
+if __name__ == "__main__":
+    print("Python Stability Under Load Test")
+    print("Load Factor | Matrix Size | Time (sec) | Current Mem (MB) | Peak Mem (MB)")
+    print("-" * 80)
+    
+    for load in [0.5, 1.0, 1.5, 2.0]:
+        results = test_stability(load)
+        print(f"{results['load_factor']:10.1f} | {results['matrix_size']:11d} | {results['time_sec']:10.3f} | {results['memory_current_mb']:15.2f} | {results['memory_peak_mb']:12.2f}")
+Java:-
+import java.util.Random;
+
+public class StabilityTest {
+    private static Random random = new Random();
+    
+    public static double[][] generateMatrix(int size) {
+        double[][] matrix = new double[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                matrix[i][j] = random.nextDouble();
+            }
+        }
+        return matrix;
+    }
+    
+    public static double[][] matrixMultiply(double[][] a, double[][] b) {
+        int size = a.length;
+        double[][] result = new double[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                for (int k = 0; k < size; k++) {
+                    result[i][j] += a[i][k] * b[k][j];
+                }
+            }
+        }
+        return result;
+    }
+    
+    public static void testStability(double loadFactor) {
+        Runtime runtime = Runtime.getRuntime();
+        
+        long startTime = System.nanoTime();
+        int matrixSize = (int)(50 * loadFactor);
+        
+        // Generate matrices
+        double[][] a = generateMatrix(matrixSize);
+        double[][] b = generateMatrix(matrixSize);
+        
+        // Perform multiplication
+        double[][] result = matrixMultiply(a, b);
+        
+        long elapsedTime = System.nanoTime() - startTime;
+        long usedMemory = runtime.totalMemory() - runtime.freeMemory();
+        
+        System.out.printf("%10.1f | %11d | %10.3f | %15.2f | %12.2f%n",
+            loadFactor,
+            matrixSize,
+            elapsedTime / 1e9,
+            usedMemory / (1024.0 * 1024.0),
+            runtime.totalMemory() / (1024.0 * 1024.0));
+    }
+    
+    public static void main(String[] args) {
+        System.out.println("Java Stability Under Load Test");
+        System.out.println("Load Factor | Matrix Size | Time (sec) | Current Mem (MB) | Peak Mem (MB)");
+        System.out.println("-".repeat(80));
+        
+        double[] loads = {0.5, 1.0, 1.5, 2.0};
+        for (double load : loads) {
+            testStability(load);
+        }
+    }
+}
+
+C++:-
+#include <iostream>
+#include <vector>
+#include <chrono>
+#include <random>
+#include <iomanip>
+
+using namespace std;
+using namespace std::chrono;
+
+vector<vector<double>> generate_matrix(int size) {
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_real_distribution<> dis(0.0, 1.0);
+    
+    vector<vector<double>> matrix(size, vector<double>(size));
+    for (int i = 0; i < size; ++i) {
+        for (int j = 0; j < size; ++j) {
+            matrix[i][j] = dis(gen);
+        }
+    }
+    return matrix;
+}
+
+vector<vector<double>> matrix_multiply(const vector<vector<double>>& a, 
+                                      const vector<vector<double>>& b) {
+    int size = a.size();
+    vector<vector<double>> result(size, vector<double>(size, 0.0));
+    
+    for (int i = 0; i < size; ++i) {
+        for (int j = 0; j < size; ++j) {
+            for (int k = 0; k < size; ++k) {
+                result[i][j] += a[i][k] * b[k][j];
+            }
+        }
+    }
+    return result;
+}
+
+void test_stability(double load_factor) {
+    auto start = high_resolution_clock::now();
+    int matrix_size = static_cast<int>(50 * load_factor);
+    
+    // Generate matrices
+    auto a = generate_matrix(matrix_size);
+    auto b = generate_matrix(matrix_size);
+    
+    // Perform multiplication
+    auto result = matrix_multiply(a, b);
+    
+    auto end = high_resolution_clock::now();
+    duration<double> elapsed = end - start;
+    
+    // Simple memory estimation (not precise in C++ without external tools)
+    size_t memory_used = (a.size() * a.size() * 3) * sizeof(double);
+    
+    cout << fixed << setprecision(1);
+    cout << setw(10) << load_factor << " | ";
+    cout << setw(11) << matrix_size << " | ";
+    cout << fixed << setprecision(3);
+    cout << setw(10) << elapsed.count() << " | ";
+    cout << fixed << setprecision(2);
+    cout << setw(15) << memory_used / (1024.0 * 1024.0) << " | ";
+    // No precise peak memory measurement in standard C++
+    cout << setw(12) << "N/A" << endl;
+}
+
+int main() {
+    cout << "C++ Stability Under Load Test" << endl;
+    cout << "Load Factor | Matrix Size | Time (sec) | Current Mem (MB) | Peak Mem (MB)" << endl;
+    cout << string(80, '-') << endl;
+    
+    double loads[] = {0.5, 1.0, 1.5, 2.0};
+    for (double load : loads) {
+        test_stability(load);
+    }
+    
+    return 0;
+}
+Rust:-
+use std::time::Instant;
+use std::mem;
+use std::collections::hash_map::RandomState;
+use std::hash::{BuildHasher, Hasher};
+
+// Simple PRNG using std's RandomState (not cryptographically secure)
+struct SimpleRng {
+    hasher: RandomState,
+    seed: u64,
+}
+
+impl SimpleRng {
+    fn new() -> Self {
+        Self {
+            hasher: RandomState::new(),
+            seed: 12345, // Fixed seed for reproducibility
+        }
+    }
+
+    fn gen(&mut self) -> f64 {
+        let mut hasher = self.hasher.build_hasher();
+        hasher.write_u64(self.seed);
+        self.seed = hasher.finish();
+        (self.seed as f64) / (u64::MAX as f64)
+    }
+}
+
+fn generate_matrix(size: usize) -> Vec<Vec<f64>> {
+    let mut rng = SimpleRng::new();
+    (0..size)
+        .map(|_| (0..size).map(|_| rng.gen()).collect())
+        .collect()
+}
+
+fn matrix_multiply(a: &[Vec<f64>], b: &[Vec<f64>]) -> Vec<Vec<f64>> {
+    let size = a.len();
+    let mut result = vec![vec![0.0; size]; size];
+    
+    for i in 0..size {
+        for j in 0..size {
+            for k in 0..size {
+                result[i][j] += a[i][k] * b[k][j];
+            }
+        }
+    }
+    result
+}
+
+fn test_stability(load_factor: f64) {
+    let start = Instant::now();
+    let matrix_size = (50.0 * load_factor) as usize;
+    
+    // Generate matrices
+    let a = generate_matrix(matrix_size);
+    let b = generate_matrix(matrix_size);
+    
+    // Perform multiplication (result intentionally unused)
+    let _result = matrix_multiply(&a, &b);
+    
+    let elapsed = start.elapsed().as_secs_f64();
+    
+    // Estimate memory usage
+    let memory_used = (a.len() * a.len() * 3) * mem::size_of::<f64>();
+    
+    println!("{:10.1} | {:11} | {:10.3} | {:15.2} | {:12}",
+        load_factor,
+        matrix_size,
+        elapsed,
+        memory_used as f64 / (1024.0 * 1024.0),
+        "N/A"); // No precise peak memory measurement in standard Rust
+}
+
+fn main() {
+    println!("Rust Stability Under Load Test");
+    println!("Load Factor | Matrix Size | Time (sec) | Current Mem (MB) | Peak Mem (MB)");
+    println!("{}", "-".repeat(80));
+    
+    let loads = [0.5, 1.0, 1.5, 2.0];
+    for &load in &loads {
+        test_stability(load);
+    }
+}
+
+
+
+
+
+
