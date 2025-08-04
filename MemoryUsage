@@ -1,9 +1,7 @@
 Python:-
 import sys
 
-def memory_test():
-    print("=== Python Memory Test ===")
-    
+def memory_test(): 
     # Step 1: Create first array
     array1 = list(range(10000))
     
@@ -29,7 +27,6 @@ def memory_test():
 Java:-
 public class MemoryTest {
     public static void memoryTest() {
-        System.out.println("=== Java Memory Test ===");
         
         // Step 1: Create first array
         int[] array1 = new int[10000];
@@ -71,7 +68,6 @@ C++:-
 #include <iomanip>
 
 void memoryTest() {
-    std::cout << "=== C++ Memory Test ===" << std::endl;
     
     // Step 1: Create first array
     std::vector<int> array1;
@@ -108,9 +104,7 @@ int main() {
 }
 
 Rust:-
-fn memory_test() {
-    println!("=== Rust Memory Test ===");
-    
+fn memory_test() {    
     // Step 1: Create first array
     let array1: Vec<i32> = (0..10000).collect();
     
