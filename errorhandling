@@ -1,0 +1,262 @@
+java:-
+import java.io.*;
+import java.util.Scanner;
+import java.lang.Math;
+
+public class SquareRootCalculator {
+    public static void main(String[] args) {
+        long startTime = System.nanoTime();
+        long startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+        
+        try {
+            File file = new File("numbers.txt");
+            Scanner scanner = new Scanner(file);
+            double sum = 0.0;
+            int lineNumber = 0;
+
+            while (scanner.hasNextLine()) {
+                lineNumber++;
+                String line = scanner.nextLine().trim();
+                
+                try {
+                    double number = Double.parseDouble(line);
+                    if (number < 0) {
+                        System.err.println("Warning: Negative number on line " + lineNumber + ", skipping");
+                        continue;
+                    }
+                    double sqrt = Math.sqrt(number);
+                    sum += sqrt;
+                } catch (NumberFormatException e) {
+                    System.err.println("Error: Invalid number format on line " + lineNumber);
+                }
+            }
+            
+            scanner.close();
+            System.out.println("Total sum of square roots: " + sum);
+        } catch (FileNotFoundException e) {
+            System.err.println("Error: File not found - numbers.txt");
+        } catch (SecurityException e) {
+            System.err.println("Error: No permission to read the file");
+        } catch (Exception e) {
+            System.err.println("Unexpected error: " + e.getMessage());
+        }
+        
+        long endTime = System.nanoTime();
+        long endMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+        
+        System.out.println("\nProfiling Results:");
+        System.out.println("Time taken: " + (endTime - startTime) + " ns");
+        System.out.println("Memory used: " + (endMemory - startMemory) + " bytes");
+    }
+}
+
+Python:-
+
+import time
+import math
+import tracemalloc
+import sys
+
+def calculate_square_roots():
+    tracemalloc.start()
+    start_time = time.perf_counter()
+    
+    try:
+        with open("numbers.txt", "r") as file:
+            lines = file.readlines()
+            total_sum = 0.0
+            
+            for line_number, line in enumerate(lines, 1):
+                try:
+                    number = float(line.strip())
+                    if number < 0:
+                        print(f"Warning: Negative number on line {line_number}, skipping", file=sys.stderr)
+                        continue
+                    sqrt = math.sqrt(number)
+                    total_sum += sqrt
+                except ValueError:
+                    print(f"Error: Invalid number format on line {line_number}", file=sys.stderr)
+            
+            print(f"Total sum of square roots: {total_sum}")
+    
+    except FileNotFoundError:
+        print("Error: File not found - numbers.txt", file=sys.stderr)
+    except PermissionError:
+        print("Error: No permission to read the file", file=sys.stderr)
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}", file=sys.stderr)
+    
+    end_time = time.perf_counter()
+    current, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    
+    print("\nProfiling Results:")
+    print(f"Time taken: {(end_time - start_time) * 1e6:.2f} µs")
+    print(f"Memory used: {peak / 1024:.2f} KB")
+
+if __name__ == "__main__":
+    calculate_square_roots()
+
+
+C++ :-
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <cmath>
+#include <chrono>
+#include <vector>
+#include <stdexcept>
+#include <iomanip>
+
+#ifdef __linux__
+#include <sys/resource.h>
+#elif _WIN32
+#include <windows.h>
+#include <psapi.h>
+#endif
+
+double get_memory_usage() {
+#ifdef __linux__
+    struct rusage usage;
+    getrusage(RUSAGE_SELF, &usage);
+    return usage.ru_maxrss / 1024.0; // KB
+#elif _WIN32
+    PROCESS_MEMORY_COUNTERS pmc;
+    GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc));
+    return pmc.WorkingSetSize / 1024.0; // KB
+#else
+    return 0.0;
+#endif
+}
+
+int main() {
+    auto start_time = std::chrono::high_resolution_clock::now();
+    double start_mem = get_memory_usage();
+    
+    try {
+        std::ifstream file("numbers.txt");
+        if (!file.is_open()) {
+            throw std::runtime_error("File not found - numbers.txt");
+        }
+        
+        std::string line;
+        double total_sum = 0.0;
+        int line_number = 0;
+        
+        while (std::getline(file, line)) {
+            line_number++;
+            try {
+                double number = std::stod(line);
+                if (number < 0) {
+                    std::cerr << "Warning: Negative number on line " << line_number << ", skipping\n";
+                    continue;
+                }
+                double sqrt = std::sqrt(number);
+                total_sum += sqrt;
+            } catch (const std::invalid_argument&) {
+                std::cerr << "Error: Invalid number format on line " << line_number << "\n";
+            } catch (const std::out_of_range&) {
+                std::cerr << "Error: Number out of range on line " << line_number << "\n";
+            }
+        }
+        
+        file.close();
+        std::cout << "Total sum of square roots: " << std::setprecision(15) << total_sum << "\n";
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << "\n";
+    }
+    
+    auto end_time = std::chrono::high_resolution_clock::now();
+    double end_mem = get_memory_usage();
+    
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+    
+    std::cout << "\nProfiling Results:\n";
+    std::cout << "Time taken: " << duration.count() << " µs\n";
+    std::cout << "Memory used: " << (end_mem - start_mem) << " KB\n";
+    
+    return 0;
+}
+
+Rust:-
+
+use std::fs::File;
+use std::io::{self, BufRead};
+use std::path::Path;
+use std::time::Instant;
+use std::error::Error;
+
+fn main() -> Result<(), Box<dyn Error>> {
+    let start_time = Instant::now();
+    let start_mem = get_memory_usage();
+    
+    let path = Path::new("numbers.txt");
+    let file = match File::open(&path) {
+        Ok(file) => file,
+        Err(e) => {
+            eprintln!("Error opening file: {}", e);
+            return Err(Box::new(e));
+        }
+    };
+    
+    let mut total_sum = 0.0;
+    
+    for (line_number, line) in io::BufReader::new(file).lines().enumerate() {
+        let line_number = line_number + 1;
+        let line = match line {
+            Ok(l) => l,
+            Err(e) => {
+                eprintln!("Error reading line {}: {}", line_number, e);
+                continue;
+            }
+        };
+        
+        let trimmed = line.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+        
+        let number: f64 = match trimmed.parse() {
+            Ok(n) => n,
+            Err(e) => {
+                eprintln!("Error parsing number on line {}: {}", line_number, e);
+                continue;
+            }
+        };
+        
+        if number < 0.0 {
+            eprintln!("Warning: Negative number on line {}, skipping", line_number);
+            continue;
+        }
+        
+        total_sum += number.sqrt();
+    }
+    
+    println!("Total sum of square roots: {:.15}", total_sum);
+    
+    let end_time = Instant::now();
+    let end_mem = get_memory_usage();
+    
+    println!("\nProfiling Results:");
+    println!("Time taken: {:?}", end_time.duration_since(start_time));
+    println!("Memory used: {} KB", end_mem - start_mem);
+    
+    Ok(())
+}
+
+#[cfg(target_os = "linux")]
+fn get_memory_usage() -> f64 {
+    let mut statm = std::fs::File::open("/proc/self/statm")
+        .expect("Failed to open /proc/self/statm");
+    let mut contents = String::new();
+    std::io::Read::read_to_string(&mut statm, &mut contents)
+        .expect("Failed to read /proc/self/statm");
+    let parts: Vec<&str> = contents.split_whitespace().collect();
+    let rss_pages: f64 = parts[1].parse().unwrap_or(0.0);
+    (rss_pages * 4.0) / 1024.0 // Convert pages to KB (assuming 4KB page size)
+}
+
+#[cfg(not(target_os = "linux"))]
+fn get_memory_usage() -> f64 {
+    0.0
+}
