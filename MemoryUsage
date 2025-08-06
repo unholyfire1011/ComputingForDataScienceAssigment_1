@@ -1,131 +1,225 @@
 Python:-
-import sys
+import psutil
+import os
 
-def memory_test(): 
-    # Step 1: Create first array
-    array1 = list(range(10000))
+LIMIT = 500000
+
+def get_memory_usage():
+    process = psutil.Process(os.getpid())
+    return process.memory_info().rss / (1024 * 1024)  # MB
+
+def main():
+ 
     
-    # Step 2: Create doubled array
-    array2 = [x * 2 for x in array1]
+    start_memory = get_memory_usage()
     
-    # Step 3: Create squared array  
-    array3 = [x * x for x in array1]
+    # Create large boolean list
+    sieve = [True] * (LIMIT + 1)
+    sieve[0] = sieve[1] = False
     
-    # Calculate memory usage
-    mem1 = sys.getsizeof(array1) + sum(sys.getsizeof(x) for x in array1[:10])
-    mem2 = sys.getsizeof(array2) + sum(sys.getsizeof(x) for x in array2[:10]) 
-    mem3 = sys.getsizeof(array3) + sum(sys.getsizeof(x) for x in array3[:10])
+    # Sieve algorithm
+    p = 2
+    while p * p <= LIMIT:
+        if sieve[p]:
+            for i in range(p * p, LIMIT + 1, p):
+                sieve[i] = False
+        p += 1
     
-    total_memory = (mem1 + mem2 + mem3) / (1024 * 1024)  # Convert to MB
+    # Collect primes and create memory pressure
+    primes = []
+    extra_data = []
     
-    print(f"Array1 size: {len(array1)}")
-    print(f"Array2 size: {len(array2)}")
-    print(f"Array3 size: {len(array3)}")
-    print(f"Total memory: {total_memory:.2f} MB")
-    print(f"Sample values: {array1[100]}, {array2[100]}, {array3[100]}")
+    for i in range(2, LIMIT + 1):
+        if sieve[i]:
+            primes.append(i)
+            # Add memory pressure
+            temp = [i + j for j in range(50)]
+            extra_data.append(temp)
+    
+    peak_memory = get_memory_usage()
+    
+    print(f"Start memory: {start_memory:.1f} MB")
+    print(f"Peak memory: {peak_memory:.1f} MB")
+    print(f"Memory used: {peak_memory - start_memory:.1f} MB")
+
+if __name__ == "__main__":
+    main()
 
 Java:-
-public class MemoryTest {
-    public static void memoryTest() {
-        
-        // Step 1: Create first array
-        int[] array1 = new int[10000];
-        for (int i = 0; i < 10000; i++) {
-            array1[i] = i;
-        }
-        
-        // Step 2: Create doubled array
-        int[] array2 = new int[10000];
-        for (int i = 0; i < 10000; i++) {
-            array2[i] = array1[i] * 2;
-        }
-        
-        // Step 3: Create squared array
-        int[] array3 = new int[10000];
-        for (int i = 0; i < 10000; i++) {
-            array3[i] = array1[i] * array1[i];
-        }
-        
-        // Calculate memory usage (each int = 4 bytes)
-        long totalBytes = (array1.length + array2.length + array3.length) * 4;
-        double totalMemory = totalBytes / (1024.0 * 1024.0);  // Convert to MB
-        
-        System.out.println("Array1 size: " + array1.length);
-        System.out.println("Array2 size: " + array2.length);
-        System.out.println("Array3 size: " + array3.length);
-        System.out.println("Total memory: " + String.format("%.2f", totalMemory) + " MB");
-        System.out.println("Sample values: " + array1[100] + ", " + array2[100] + ", " + array3[100]);
-    }
+
+import java.util.*;
+import java.lang.management.*;
+
+public class Main {
+    static final int LIMIT = 500000;
     
     public static void main(String[] args) {
-        memoryTest();
+        MemoryMXBean memory = ManagementFactory.getMemoryMXBean();
+        
+        long startMemory = memory.getHeapMemoryUsage().getUsed() / (1024 * 1024);
+     
+        
+        // Create large boolean array
+        boolean[] sieve = new boolean[LIMIT + 1];
+        Arrays.fill(sieve, true);
+        sieve[0] = sieve[1] = false;
+        
+        // Sieve algorithm
+        for (int p = 2; p * p <= LIMIT; p++) {
+            if (sieve[p]) {
+                for (int i = p * p; i <= LIMIT; i += p) {
+                    sieve[i] = false;
+                }
+            }
+        }
+        
+        // Collect primes and create memory pressure
+        List<Integer> primes = new ArrayList<>();
+        List<List<Integer>> extraData = new ArrayList<>();
+        
+        for (int i = 2; i <= LIMIT; i++) {
+            if (sieve[i]) {
+                primes.add(i);
+                // Add memory pressure
+                List<Integer> temp = new ArrayList<>();
+                for (int j = 0; j < 50; j++) {
+                    temp.add(i + j);
+                }
+                extraData.add(temp);
+            }
+        }
+        long peakMemory = memory.getHeapMemoryUsage().getUsed() / (1024 * 1024);
+        
+        System.out.println("Start memory: " + startMemory + " MB");
+        System.out.println("Peak memory: " + peakMemory + " MB");
+        System.out.println("Memory used: " + (peakMemory - startMemory) + " MB");
     }
 }
 
 C++:-
 #include <iostream>
 #include <vector>
-#include <iomanip>
+#include <fstream>
 
-void memoryTest() {
-    
-    // Step 1: Create first array
-    std::vector<int> array1;
-    for (int i = 0; i < 10000; i++) {
-        array1.push_back(i);
+const int LIMIT = 500000;
+
+long getMemoryUsage() {
+    std::ifstream status("/proc/self/status");
+    std::string line;
+    while (std::getline(status, line)) {
+        if (line.substr(0, 6) == "VmRSS:") {
+            return std::stol(line.substr(7)) / 1024; // Convert KB to MB
+        }
     }
-    
-    // Step 2: Create doubled array
-    std::vector<int> array2;
-    for (int i = 0; i < 10000; i++) {
-        array2.push_back(array1[i] * 2);
-    }
-    
-    // Step 3: Create squared array
-    std::vector<int> array3;
-    for (int i = 0; i < 10000; i++) {
-        array3.push_back(array1[i] * array1[i]);
-    }
-    
-    // Calculate memory usage (each int = 4 bytes)
-    size_t totalBytes = (array1.size() + array2.size() + array3.size()) * sizeof(int);
-    double totalMemory = totalBytes / (1024.0 * 1024.0);  // Convert to MB
-    
-    std::cout << "Array1 size: " << array1.size() << std::endl;
-    std::cout << "Array2 size: " << array2.size() << std::endl;
-    std::cout << "Array3 size: " << array3.size() << std::endl;
-    std::cout << "Total memory: " << std::fixed << std::setprecision(2) << totalMemory << " MB" << std::endl;
-    std::cout << "Sample values: " << array1[100] << ", " << array2[100] << ", " << array3[100] << std::endl;
+    return 0;
 }
 
 int main() {
-    memoryTest();
+ 
+    
+    long startMemory = getMemoryUsage();
+ 
+    
+    // Create large boolean vector
+    std::vector<bool> sieve(LIMIT + 1, true);
+    sieve[0] = sieve[1] = false;
+    
+    // Sieve algorithm
+    for (int p = 2; p * p <= LIMIT; ++p) {
+        if (sieve[p]) {
+            for (int i = p * p; i <= LIMIT; i += p) {
+                sieve[i] = false;
+            }
+        }
+    }
+    
+    // Collect primes and create memory pressure
+    std::vector<int> primes;
+    std::vector<std::vector<int>> extraData;
+    
+    for (int i = 2; i <= LIMIT; ++i) {
+        if (sieve[i]) {
+            primes.push_back(i);
+            // Add memory pressure
+            std::vector<int> temp;
+            for (int j = 0; j < 50; ++j) {
+                temp.push_back(i + j);
+            }
+            extraData.push_back(temp);
+        }
+    }
+    long peakMemory = getMemoryUsage();
+    std::cout << "Start memory: " << startMemory << " MB" << std::endl;
+    std::cout << "Peak memory: " << peakMemory << " MB" << std::endl;
+    std::cout << "Memory used: " << (peakMemory - startMemory) << " MB" << std::endl;
+    
     return 0;
 }
 
 Rust:-
-fn memory_test() {    
-    // Step 1: Create first array
-    let array1: Vec<i32> = (0..10000).collect();
-    
-    // Step 2: Create doubled array
-    let array2: Vec<i32> = array1.iter().map(|x| x * 2).collect();
-    
-    // Step 3: Create squared array
-    let array3: Vec<i32> = array1.iter().map(|x| x * x).collect();
-    
-    // Calculate memory usage (each i32 = 4 bytes)
-    let total_bytes = (array1.len() + array2.len() + array3.len()) * std::mem::size_of::<i32>();
-    let total_memory = total_bytes as f64 / (1024.0 * 1024.0);  // Convert to MB
-    
-    println!("Array1 size: {}", array1.len());
-    println!("Array2 size: {}", array2.len());
-    println!("Array3 size: {}", array3.len());
-    println!("Total memory: {:.2} MB", total_memory);
-    println!("Sample values: {}, {}, {}", array1[100], array2[100], array3[100]);
+const LIMIT: usize = 500_000;
+
+fn get_memory_usage() -> usize {
+    use std::fs;
+    if let Ok(contents) = fs::read_to_string("/proc/self/status") {
+        for line in contents.lines() {
+            if line.starts_with("VmRSS:") {
+                let parts: Vec<&str> = line.split_whitespace().collect();
+                if parts.len() >= 2 {
+                    if let Ok(kb) = parts[1].parse::<usize>() {
+                        return kb / 1024; // Convert KB to MB
+                    }
+                }
+            }
+        }
+    }
+    0
 }
 
 fn main() {
-    memory_test();
+    println!("=== Rust Memory Test ===");
+    
+    let start_memory = get_memory_usage();
+    
+    
+    // Create large boolean vector
+    let mut sieve = vec![true; LIMIT + 1];
+    sieve[0] = false;
+    if sieve.len() > 1 {
+        sieve[1] = false;
+    }
+    
+    // Sieve algorithm
+    let mut p = 2;
+    while p * p <= LIMIT {
+        if sieve[p] {
+            let mut i = p * p;
+            while i <= LIMIT {
+                sieve[i] = false;
+                i += p;
+            }
+        }
+        p += 1;
+    }
+    
+    // Collect primes and create memory pressure
+    let mut primes = Vec::new();
+    let mut extra_data: Vec<Vec<usize>> = Vec::new();
+    
+    for (i, &is_prime) in sieve.iter().enumerate() {
+        if is_prime && i >= 2 {
+            primes.push(i);
+            // Add memory pressure
+            let temp: Vec<usize> = (0..50).map(|j| i + j).collect();
+            extra_data.push(temp);
+        }
+    }
+    
+
+    let peak_memory = get_memory_usage();
+    
+  
+    println!("Start memory: {} MB", start_memory);
+    println!("Peak memory: {} MB", peak_memory);
+    println!("Memory used: {} MB", peak_memory - start_memory);
 }
-memory_test()
